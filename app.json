@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "Saldo en Mano",
+    "slug": "saldo-en-mano",
+    "version": "0.1.0",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sabinowhite.saldoenmano",
+      "buildNumber": "1"
+    },
+    "android": {
+      "package": "com.sabinowhite.saldoenmano",
+      "versionCode": 1
+    },
+    "web": {
+      "name": "Saldo en Mano",
+      "shortName": "Saldo en Mano"
+    },
+    "extra": {
+      "prototype": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "scheme": "saldoenmano",
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

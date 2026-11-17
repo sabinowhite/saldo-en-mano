@@ -6,7 +6,11 @@ Aplicación de control de finanzas personales para Android y iPhone. Ayudará a 
 
 ## Estado del proyecto
 
-Definición inicial. Este repositorio todavía no contiene una aplicación ejecutable ni un APK. Las funciones descritas son requisitos y propuestas de implementación, no prestaciones ya disponibles.
+Prototipo interactivo 0.1.0 con Expo SDK 58, Expo Router y TypeScript. Incluye inicio, movimientos, apartados, pagos, deudas y ajustes. Permite simular movimientos durante una sesión con datos ficticios.
+
+**No usar con datos reales:** todavía no tiene persistencia, cifrado, biometría, notificaciones ni respaldo. No hay APK de distribución ni firma de publicación creada. Las funciones descritas más adelante siguen siendo el alcance objetivo; no están todas implementadas.
+
+Consulta [Desarrollo y estado de implementación](docs/DESARROLLO.md) para instalar, ejecutar y conocer las limitaciones.
 
 Nombre y lema elegidos para el proyecto; su revisión de marca sigue pendiente antes de publicarlos.
 
