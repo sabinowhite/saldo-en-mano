@@ -28,10 +28,37 @@ export function assertFinanceState(input: unknown): asserts input is FinanceStat
         if (!['income', 'expense', 'transfer'].includes(String(item.kind)) || !positive(item.cents) || !account(item.account) || !date(item.date) || item.date < opening.date) fail();
       } else if (name === 'reserves') {
         if (!positive(item.cents) || !account(item.account) || typeof item.delivered !== 'boolean') fail();
+        if (item.deliveredCents !== undefined && (!nonnegative(item.deliveredCents) || item.deliveredCents > item.cents || item.delivered !== (item.deliveredCents === item.cents))) fail();
+        if (item.cancelled !== undefined && typeof item.cancelled !== 'boolean') fail();
       } else if (name === 'payments') {
-        if (!positive(item.cents) || !account(item.account) || !date(item.date) || typeof item.reserved !== 'boolean' || typeof item.paid !== 'boolean') fail();
-      } else if (!nonnegative(item.cents) || !nonnegative(item.monthlyCents) || !text(item.creditor)) fail();
+        if (!nonnegative(item.cents) || !account(item.account) || !date(item.date) || typeof item.reserved !== 'boolean' || typeof item.paid !== 'boolean' || (item.paid && item.cents === 0)) fail();
+        if (item.cancelled !== undefined && typeof item.cancelled !== 'boolean') fail();
+      } else {
+        if (!nonnegative(item.cents) || !nonnegative(item.monthlyCents) || !text(item.creditor)) fail();
+        if (item.nextChargeDate !== undefined && (!date(item.nextChargeDate) || !integer(item.anchorDay) || item.anchorDay < 1 || item.anchorDay > 31)) fail();
+      }
     }
+  }
+  const templates = input.templates ?? [];
+  const events = input.debtEvents ?? [];
+  const edits = input.edits ?? [];
+  const expected = input.expectedIncomes ?? [];
+  for (const list of [templates, events, edits, expected]) {
+    if (!Array.isArray(list)) fail();
+    const ids = new Set<string>();
+    for (const item of list) { if (!object(item) || !text(item.id) || ids.has(item.id)) fail(); ids.add(item.id); }
+  }
+  for (const t of templates as Record<string, unknown>[]) {
+    if (!text(t.concept) || !nonnegative(t.cents) || (!t.variable && t.cents === 0) || !account(t.account) || !date(t.nextDate) || !integer(t.anchorDay) || t.anchorDay < 1 || t.anchorDay > 31 || !['once', 'weekly', 'fortnightly', 'monthly', 'bimonthly'].includes(String(t.frequency)) || typeof t.enabled !== 'boolean' || typeof t.reserved !== 'boolean' || typeof t.variable !== 'boolean' || typeof t.reminder !== 'boolean') fail();
+  }
+  for (const e of events as Record<string, unknown>[]) {
+    if (!text(e.debtId) || !date(e.date) || !integer(e.cents) || !['opening', 'charge', 'adjustment'].includes(String(e.kind))) fail();
+  }
+  for (const e of expected as Record<string, unknown>[]) { if (!date(e.date) || !positive(e.cents) || !nonnegative(e.receivedCents)) fail(); }
+  if (settings.nextIncomeDate !== undefined && !date(settings.nextIncomeDate)) fail();
+  if (input.incomeCursor !== undefined && !date(input.incomeCursor)) fail();
+  for (const e of edits as Record<string, unknown>[]) {
+    if (!text(e.entryId) || !date(e.date) || !object(e.before) || (e.after !== null && !object(e.after))) fail();
   }
   // Validate the accounting identity, not just JSON field types.
   const state = input as unknown as FinanceState;

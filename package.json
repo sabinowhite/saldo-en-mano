@@ -1,22 +1,31 @@
 {
   "name": "saldo-en-mano",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
     "expo": "~58.0.26",
+    "expo-background-task": "~58.0.13",
     "expo-constants": "~58.0.16",
     "expo-crypto": "~58.0.8",
+    "expo-document-picker": "~58.0.5",
     "expo-file-system": "~58.0.14",
     "expo-font": "~58.0.12",
     "expo-linking": "~58.0.17",
+    "expo-local-authentication": "~58.0.3",
+    "expo-network": "~58.0.5",
+    "expo-notifications": "~58.1.9",
     "expo-router": "~58.0.32",
     "expo-secure-store": "~58.0.3",
+    "expo-sharing": "~58.0.23",
     "expo-sqlite": "~58.0.18",
     "expo-status-bar": "~58.0.5",
+    "expo-task-manager": "~58.0.14",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-native": "0.88.1",
+    "react-native-nitro-google-signin": "^2.3.1",
+    "react-native-nitro-modules": "^0.37.2",
     "react-native-safe-area-context": "~5.11.1",
     "react-native-screens": "~4.30.1",
     "react-native-web": "^0.21.4"
@@ -25,8 +34,8 @@
     "@types/node": "^24.0.0",
     "@types/react": "~19.3.0",
     "eslint": "^9.39.5",
-    "typescript": "~6.0.3",
-    "eslint-config-expo": "~58.0.4"
+    "eslint-config-expo": "~58.0.4",
+    "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",
@@ -39,7 +48,8 @@
     "export:web": "expo export --platform web",
     "export:native": "expo export --platform android --platform ios",
     "lint": "expo lint",
-    "check:native-config": "node scripts/check-native-config.cjs"
+    "check:native-config": "node scripts/check-native-config.cjs",
+    "check:build-ready": "node scripts/check-build-ready.cjs"
   },
   "private": true,
   "engines": {

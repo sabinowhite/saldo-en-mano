@@ -1,0 +1,19 @@
+{
+  "cli": { "appVersionSource": "remote" },
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "credentialsSource": "remote",
+      "autoIncrement": true,
+      "node": "24.22.1",
+      "android": { "buildType": "apk" }
+    },
+    "production": {
+      "credentialsSource": "remote",
+      "autoIncrement": true,
+      "node": "24.22.1",
+      "android": { "buildType": "app-bundle" }
+    }
+  }
+}

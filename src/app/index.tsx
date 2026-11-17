@@ -3,5 +3,5 @@ import { Dashboard } from '../screens/Dashboard';
 import { useFinance } from '../state/FinanceContext';
 export default function HomeRoute() {
   const { state, openSheet } = useFinance();
-  return <Dashboard state={state} onNew={kind => openSheet({ kind })} onMovements={() => router.navigate('/movements')} onPlans={() => router.navigate('/plans')} />;
+  return <Dashboard state={state} onExpected={id => openSheet({ kind: 'expected-income', id })} onNew={kind => openSheet({ kind })} onMovements={() => router.navigate('/movements')} onPlans={() => router.navigate('/plans')} />;
 }

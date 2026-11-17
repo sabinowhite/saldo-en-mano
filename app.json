@@ -2,13 +2,13 @@
   "expo": {
     "name": "Saldo en Mano",
     "slug": "saldo-en-mano",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "orientation": "default",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sabinowhite.saldoenmano",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
@@ -18,13 +18,17 @@
     },
     "android": {
       "package": "com.sabinowhite.saldoenmano",
-      "versionCode": 2,
+      "versionCode": 3,
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE",
         "android.permission.SYSTEM_ALERT_WINDOW"
-      ]
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/saldo-icon.png",
+        "backgroundColor": "#174E40"
+      }
     },
     "web": {
       "name": "Saldo en Mano",
@@ -45,14 +49,28 @@
       [
         "expo-secure-store",
         {
-          "configureAndroidBackup": true,
-          "faceIDPermission": false
+          "configureAndroidBackup": true
         }
-      ]
+      ],
+      "expo-sharing",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Usa Face ID para proteger el acceso a tus finanzas."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#176B57"
+        }
+      ],
+      "expo-background-task"
     ],
     "scheme": "saldoenmano",
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "icon": "./assets/saldo-icon.png"
   }
 }

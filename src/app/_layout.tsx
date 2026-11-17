@@ -1,13 +1,15 @@
+import '../services/background';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Slot, router, usePathname } from 'expo-router';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { FinanceProvider, useFinance } from '../state/FinanceContext';
 import { Icon, IconName, colors, ui } from '../components/ui';
-const tabs: { path: '/' | '/movements' | '/plans' | '/settings'; label: string; icon: IconName; active: IconName }[] = [
+const tabs: { path: '/' | '/movements' | '/plans' | '/reports' | '/settings'; label: string; icon: IconName; active: IconName }[] = [
   { path: '/', label: 'Inicio', icon: 'grid-outline', active: 'grid' },
   { path: '/movements', label: 'Movimientos', icon: 'swap-vertical-outline', active: 'swap-vertical' },
   { path: '/plans', label: 'Mi plan', icon: 'layers-outline', active: 'layers' },
+  { path: '/reports', label: 'Resumen', icon: 'stats-chart-outline', active: 'stats-chart' },
   { path: '/settings', label: 'Ajustes', icon: 'options-outline', active: 'options' },
 ];
 function Shell() {

@@ -6,13 +6,11 @@ Aplicación de control de finanzas personales para Android y iPhone. Ayudará a 
 
 ## Estado del proyecto
 
-Versión de desarrollo 0.2.0 con Expo SDK 58, Expo Router y TypeScript. Incluye bienvenida, configuración inicial, pantallas financieras y persistencia SQLite/SQLCipher para Android e iOS, con clave en SecureStore y transacciones.
+Candidata de desarrollo 0.3.0 con Expo SDK 58, Expo Router y TypeScript. Incluye movimientos editables, ingresos esperados, apartados parciales, pagos recurrentes, deudas, reportes, almacenamiento cifrado, bloqueo, recordatorios y respaldo recuperable con conexión opcional a Google Drive.
 
-**Usar datos ficticios hasta completar las pruebas nativas.** La persistencia está implementada, pero falta validarla con SQLCipher y el almacén seguro reales en teléfonos. Requiere una compilación nativa con SQLCipher; Expo Go y la web permiten solo la demostración en memoria. No existe fallback a guardado sin cifrar.
+El código está preparado para la primera prueba completa. Aún no hay APK firmado: falta vincular el proyecto de Expo, preparar la firma permanente y configurar los clientes OAuth de Google. Los módulos nativos deben validarse juntos en teléfonos con datos ficticios. Expo Go y la web ofrecen únicamente demostración en memoria.
 
-Todavía no hay bloqueo biométrico, notificaciones, respaldo recuperable, firma permanente ni APK de distribución. Alta y edición completas de apartados, plantillas y deudas siguen pendientes. El resto de este documento describe el alcance objetivo, no una lista de funciones terminadas.
-
-Consulta [Desarrollo y estado de implementación](docs/DESARROLLO.md) y [Persistencia local](docs/ALMACENAMIENTO.md). La demostración permanece separada de los datos personales y no los reemplaza.
+Consulta [Primera versión completa y configuración pendiente](docs/PRIMERA_VERSION.md), [Desarrollo](docs/DESARROLLO.md) y [Persistencia local](docs/ALMACENAMIENTO.md).
 
 Nombre y lema elegidos para el proyecto; su revisión de marca sigue pendiente antes de publicarlos.
 

@@ -1,4 +1,4 @@
-# Persistencia local — versión 0.2.0
+# Persistencia local — versión 0.3.0
 
 ## Estado y límites
 
@@ -23,9 +23,9 @@ No existe fallback a una base sin cifrar. Una clave inválida, datos inconsisten
 
 ## Almacén seguro y copias del sistema
 
-La clave usa WHEN_UNLOCKED_THIS_DEVICE_ONLY en iOS y el almacén seguro disponible en Android. No se solicita autenticación biométrica todavía. El cifrado del archivo no equivale a un bloqueo de la interfaz cuando el teléfono está desbloqueado.
+La clave usa WHEN_UNLOCKED_THIS_DEVICE_ONLY en iOS y el almacén seguro disponible en Android. El usuario puede activar bloqueo de interfaz mediante biometría o código del teléfono. El cifrado del archivo no equivale a un bloqueo de la interfaz cuando el teléfono está desbloqueado.
 
-Android tiene allowBackup=false y la configuración de exclusión de SecureStore. Se bloquean permisos de almacenamiento externo y superposición de ventanas; iOS no permite cargas de red arbitrarias. No se debe asumir que Android Auto Backup recuperará estos datos. En iOS, una restauración del archivo en otro dispositivo no migra esta clave de dispositivo; por eso la recuperación entre teléfonos depende del respaldo recuperable que aún no se implementa.
+Android tiene allowBackup=false y la configuración de exclusión de SecureStore. Se bloquean permisos de almacenamiento externo y superposición de ventanas; iOS no permite cargas de red arbitrarias. No se debe asumir que Android Auto Backup recuperará estos datos. En iOS, una restauración del archivo en otro dispositivo no migra esta clave de dispositivo; por eso la recuperación entre teléfonos depende del respaldo cifrado recuperable independiente, implementado en esta versión.
 
 No eliminar la app para resolver un error: en Android la desinstalación elimina la clave y los datos de la aplicación. No se presenta ninguna opción para borrar datos personales en esta versión. El botón de reinicio existe solo en la demostración y no llama al repositorio persistente.
 
@@ -39,7 +39,7 @@ La información personal comienza sin movimientos, deudas, pagos ni apartados de
 
 ## Escrituras y migraciones
 
-Esquema 1: tabla finance_state con una sola fila, payload JSON validado y revisión creciente. La implementación inicial guarda el estado completo; una futura normalización de tablas deberá realizarse mediante una migración versionada.
+Esquema 2: tablas finance_state y finance_restore_history; la primera mantiene una sola fila, payload JSON validado y revisión creciente. La implementación inicial guarda el estado completo; una futura normalización de tablas deberá realizarse mediante una migración versionada.
 
 Todas las lecturas y escrituras del repositorio se serializan. Cada cambio usa BEGIN IMMEDIATE, parámetros vinculados y COMMIT o ROLLBACK sobre una única conexión privada ya desbloqueada con la clave. No se usa withExclusiveTransactionAsync porque crea otra conexión que necesitaría su propia inicialización de SQLCipher.
 
@@ -62,7 +62,7 @@ Pendientes de ejecutar sobre una compilación nativa con datos ficticios:
 - Actualizar sobre una instalación anterior usando el mismo identificador y certificado; verificar conservación de base y clave.
 - Revisar bloqueo del dispositivo, navegación, textos grandes y pantallas con teclado en Android e iOS.
 
-Todavía no hay recuperación externa, sincronización, biometría ni un APK de distribución firmado. Estas comprobaciones no se marcan como aprobadas por haber exportado los bundles JavaScript.
+Hay recuperación externa cifrada y bloqueo opcional implementados; todavía no hay un APK de distribución firmado. Ver PRIMERA_VERSION.md para configuración de Drive y límites. Estas comprobaciones no se marcan como aprobadas por haber exportado los bundles JavaScript.
 
 ## Referencias
 

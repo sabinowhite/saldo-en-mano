@@ -85,9 +85,9 @@ test('migración es repetible y no reinicializa registros existentes', async () 
 test('versión futura y tablas desconocidas no se borran ni migran silenciosamente', async () => {
   const future = new DatabaseSync(':memory:'); const unknown = new DatabaseSync(':memory:');
   try {
-    future.exec('PRAGMA user_version = 2');
+    future.exec('PRAGMA user_version = 3');
     await assert.rejects(migrateDatabase(driver(future)), hasCode('future-schema'));
-    assert.equal(future.prepare('PRAGMA user_version').get()?.user_version, 2);
+    assert.equal(future.prepare('PRAGMA user_version').get()?.user_version, 3);
     unknown.exec('CREATE TABLE precious (value TEXT); INSERT INTO precious VALUES (\'keep\')');
     await assert.rejects(migrateDatabase(driver(unknown)), hasCode('corrupt-data'));
     assert.equal(unknown.prepare('SELECT value FROM precious').get()?.value, 'keep');
@@ -152,5 +152,36 @@ test('payload corrupto se conserva para recuperación en lugar de reemplazarse p
     await assert.rejects(repo.load(), hasCode('corrupt-data'));
     await assert.rejects(repo.initialize(createInitialState(input, today)), hasCode('corrupt-data'));
     assert.equal(db.prepare('SELECT payload FROM finance_state').get()?.payload, '{broken');
+  } finally { db.close(); }
+});
+
+test('restauración reemplaza estado de forma atómica y conserva la versión anterior cifrada por la base', async () => {
+  const db = new DatabaseSync(':memory:'); const sql = driver(db);
+  try {
+    await migrateDatabase(sql); const repo = createRepository(sql);
+    const original = createInitialState(input, today); await repo.initialize(original);
+    const restored = demoState(today); await repo.restore(restored);
+    assert.deepEqual(await repo.load(), restored);
+    const row = db.prepare('SELECT payload FROM finance_restore_history ORDER BY id DESC LIMIT 1').get();
+    assert.deepEqual(JSON.parse(String(row?.payload)), original);
+  } finally { db.close(); }
+});
+test('migración desde esquema 1 conserva la información y permite restaurar', async () => {
+  const db = new DatabaseSync(':memory:'); const sql = driver(db);
+  try {
+    db.exec('CREATE TABLE finance_state (id INTEGER PRIMARY KEY, payload TEXT NOT NULL, revision INTEGER NOT NULL); PRAGMA user_version = 1');
+    const original = createInitialState(input, today); db.prepare('INSERT INTO finance_state VALUES (1, ?, 1)').run(encodeState(original));
+    await migrateDatabase(sql); const repo = createRepository(sql);
+    assert.deepEqual(await repo.load(), original); await repo.restore(demoState(today));
+    assert.equal(db.prepare('SELECT COUNT(*) AS n FROM finance_restore_history').get()?.n, 1);
+  } finally { db.close(); }
+});
+test('error al restaurar no reemplaza el estado ni deja una copia parcial del historial', async () => {
+  const db = new DatabaseSync(':memory:'); const sql = driver(db);
+  try {
+    await migrateDatabase(sql); await createRepository(sql).initialize(createInitialState(input, today));
+    const repo = createRepository({ ...sql, runAsync: async (command, ...params) => { const result = await sql.runAsync(command, ...params); if (command.includes('ON CONFLICT')) throw new Error('disk failure'); return result; } });
+    const before = await repo.load(); await assert.rejects(repo.restore(demoState(today)));
+    assert.deepEqual(await repo.load(), before); assert.equal(db.prepare('SELECT COUNT(*) AS n FROM finance_restore_history').get()?.n, 0);
   } finally { db.close(); }
 });

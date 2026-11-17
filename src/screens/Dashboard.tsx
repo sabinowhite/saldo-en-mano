@@ -1,10 +1,10 @@
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { FinanceState, available, reserved, money, localDate, period, periodLabel } from '../domain/finance';
-import { Card, Heading, Icon, ui, colors } from '../components/ui';
+import { Card, Button, Heading, Icon, ui, colors } from '../components/ui';
 import { MovementList } from './Movements';
 
-type Props = { state: FinanceState; onNew: (kind: 'expense' | 'income' | 'transfer') => void; onMovements: () => void; onPlans: () => void };
-export function Dashboard({ state, onNew, onMovements, onPlans }: Props) {
+type Props = { state: FinanceState; onNew: (kind: 'expense' | 'income' | 'transfer') => void; onMovements: () => void; onPlans: () => void; onExpected: (id: string) => void };
+export function Dashboard({ state, onNew, onMovements, onPlans, onExpected }: Props) {
   const current = state.entries.filter(e => period(e.date) === period(localDate()));
   const income = current.filter(e => e.kind === 'income').reduce((s, e) => s + e.cents, 0);
   const expense = current.filter(e => e.kind === 'expense').reduce((s, e) => s + e.cents, 0);
@@ -19,6 +19,7 @@ export function Dashboard({ state, onNew, onMovements, onPlans }: Props) {
     </View>
     <View style={s.accounts}>{(['bank', 'cash'] as const).map(a => <View key={a} style={s.account}><Icon name={a === 'bank' ? 'business-outline' : 'cash-outline'} /><Text style={ui.small}>{a === 'bank' ? 'En banco' : 'En efectivo'}</Text><Text style={ui.amount} adjustsFontSizeToFit numberOfLines={1}>{money(state.balances[a])}</Text><Text style={ui.small}>Libre: {money(available(state, a))}</Text></View>)}</View>
     <View style={s.quick}>{([{ kind: 'expense', label: 'Gasto', icon: 'add' }, { kind: 'income', label: 'Ingreso', icon: 'arrow-down' }, { kind: 'transfer', label: 'Transferir', icon: 'swap-horizontal' }] as const).map(a => <Pressable accessibilityRole="button" accessibilityLabel={`Registrar ${a.label.toLowerCase()}`} onPress={() => onNew(a.kind)} key={a.kind} style={({ pressed }) => [s.quickItem, { opacity: pressed ? .6 : 1 }]}><View style={[s.quickIcon, a.kind === 'expense' && { backgroundColor: colors.primary }]}><Icon name={a.icon} color={a.kind === 'expense' ? 'white' : colors.primary} /></View><Text style={ui.h3}>{a.label}</Text></Pressable>)}</View>
+    {(state.expectedIncomes ?? []).filter(e => e.receivedCents < e.cents).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3).map(e => <Card key={e.id}><Text style={ui.h3}>Ingreso esperado · {e.date.split('-').reverse().join('/')}</Text><Text style={ui.amount}>{money(e.cents - e.receivedCents)}</Text><Text style={ui.small}>Pendiente de recibir. Puedes confirmar abonos parciales; solo lo recibido aumenta tu saldo.</Text><Button label="Confirmar dinero recibido" secondary onPress={() => onExpected(e.id)} /></Card>)}
     <Heading title="Así va tu quincena" />
     <Card><View style={ui.spread}><View style={ui.flex}><Text style={ui.small}>Ingresos recibidos</Text><Text style={[ui.amount, { color: colors.primary }]}>{money(income)}</Text></View><View style={ui.flex}><Text style={ui.small}>Gastos realizados</Text><Text style={ui.amount}>{money(expense)}</Text></View></View><View style={s.track}><View style={[s.fill, { width: `${income ? Math.min(100, expense / income * 100) : 0}%` }]} /></View><Text style={ui.small}>Los retiros entre banco y cartera no cuentan como gastos.</Text></Card>
     <Pressable accessibilityRole="button" onPress={onPlans} style={s.plan}><View style={ui.iconTile}><Icon name="calendar-outline" /></View><View style={ui.flex}><Text style={ui.h3}>Tus próximos compromisos</Text><Text style={ui.small}>{state.payments.filter(p => !p.paid).length} pagos pendientes · Revisa tu plan</Text></View><Icon name="chevron-forward" size={19} /></Pressable>
