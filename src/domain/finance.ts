@@ -6,6 +6,7 @@ export type Payment = { id: string; concept: string; cents: number; account: Acc
 export type Debt = { id: string; creditor: string; concept: string; cents: number; monthlyCents: number };
 export type Settings = { salaryCents: number; frequency: Frequency; offeringPercent: number };
 export type FinanceState = {
+  opening: { date: string; bankCents: number; cashCents: number };
   balances: Record<Account, number>; entries: Entry[]; reserves: Reserve[];
   payments: Payment[]; debts: Debt[]; settings: Settings;
 };
@@ -63,6 +64,8 @@ export function financeReducer(state: FinanceState, action: Action): FinanceStat
     if (!Number.isSafeInteger(salaryCents) || salaryCents <= 0 || !Number.isFinite(offeringPercent) || offeringPercent < 0 || offeringPercent > 100 || !['weekly', 'fortnightly', 'monthly'].includes(frequency)) throw new Error('Configuración inválida.');
     return { ...state, settings: action.settings };
   }
+  const actionDate = action.type === 'entry' ? action.entry.date : action.date;
+  if (actionDate < state.opening.date) throw new Error('La fecha no puede ser anterior a los saldos iniciales.');
   const entryId = action.type === 'entry' ? action.entry.id : action.entryId;
   if (!entryId.trim()) throw new Error('El movimiento requiere identificador.');
   if (state.entries.some(e => e.id === entryId)) return state;
@@ -101,6 +104,7 @@ export function financeReducer(state: FinanceState, action: Action): FinanceStat
 }
 export function demoState(today = localDate()): FinanceState {
   return {
+    opening: { date: today, bankCents: 0, cashCents: 0 },
     balances: { bank: 1100000, cash: 252000 },
     entries: [
       { id: 'demo-gas', kind: 'expense', concept: 'Gasolina', cents: 48000, date: today, account: 'cash' },

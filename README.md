@@ -6,11 +6,13 @@ Aplicación de control de finanzas personales para Android y iPhone. Ayudará a 
 
 ## Estado del proyecto
 
-Prototipo interactivo 0.1.0 con Expo SDK 58, Expo Router y TypeScript. Incluye inicio, movimientos, apartados, pagos, deudas y ajustes. Permite simular movimientos durante una sesión con datos ficticios.
+Versión de desarrollo 0.2.0 con Expo SDK 58, Expo Router y TypeScript. Incluye bienvenida, configuración inicial, pantallas financieras y persistencia SQLite/SQLCipher para Android e iOS, con clave en SecureStore y transacciones.
 
-**No usar con datos reales:** todavía no tiene persistencia, cifrado, biometría, notificaciones ni respaldo. No hay APK de distribución ni firma de publicación creada. Las funciones descritas más adelante siguen siendo el alcance objetivo; no están todas implementadas.
+**Usar datos ficticios hasta completar las pruebas nativas.** La persistencia está implementada, pero falta validarla con SQLCipher y el almacén seguro reales en teléfonos. Requiere una compilación nativa con SQLCipher; Expo Go y la web permiten solo la demostración en memoria. No existe fallback a guardado sin cifrar.
 
-Consulta [Desarrollo y estado de implementación](docs/DESARROLLO.md) para instalar, ejecutar y conocer las limitaciones.
+Todavía no hay bloqueo biométrico, notificaciones, respaldo recuperable, firma permanente ni APK de distribución. Alta y edición completas de apartados, plantillas y deudas siguen pendientes. El resto de este documento describe el alcance objetivo, no una lista de funciones terminadas.
+
+Consulta [Desarrollo y estado de implementación](docs/DESARROLLO.md) y [Persistencia local](docs/ALMACENAMIENTO.md). La demostración permanece separada de los datos personales y no los reemplaza.
 
 Nombre y lema elegidos para el proyecto; su revisión de marca sigue pendiente antes de publicarlos.
 
@@ -174,10 +176,10 @@ La identidad definitiva de la app, la custodia de claves y la primera compilaci�
 
 ## Próximos pasos
 
-1. Preparar el proyecto Expo con versiones compatibles y verificadas.
-2. Implementar las pantallas principales y revisar su diseño.
-3. Implementar las reglas financieras y la persistencia local.
-4. Integrar bloqueo, cifrado, recordatorios y respaldo recuperable.
+1. Validar pantallas, persistencia y cifrado en compilaciones nativas de prueba.
+2. Completar captura y edición de apartados, plantillas, pagos y deudas.
+3. Integrar bloqueo, recordatorios y respaldo recuperable.
+4. Resolver o evaluar los avisos de dependencias antes de distribuir.
 5. Configurar firma permanente y validar la primera distribución Android.
 6. Probar y preparar la distribución iOS.
 
