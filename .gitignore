@@ -1,0 +1,45 @@
+# Dependencies and generated output
+node_modules/
+.expo/
+dist/
+web-build/
+coverage/
+*.log
+*.tsbuildinfo
+
+# Local environment; templates may be tracked
+.env
+.env.*
+!.env.example
+
+# Signing and service credentials
+*.jks
+*.keystore
+*.p12
+*.p8
+*.mobileprovision
+*.pem
+credentials.json
+google-services.json
+GoogleService-Info.plist
+client_secret*.json
+service-account*.json
+
+# Financial data and backups
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+backups/
+private-data/
+
+# Build artifacts
+*.apk
+*.aab
+*.ipa
+
+# Local operating-system files
+.DS_Store
+Thumbs.db
