@@ -25,7 +25,7 @@ export function assertFinanceState(input: unknown): asserts input is FinanceStat
       if (!object(item) || !text(item.id) || ids.has(item.id) || !text(item.concept)) fail();
       ids.add(item.id);
       if (name === 'entries') {
-        if (!['income', 'expense', 'transfer'].includes(String(item.kind)) || !positive(item.cents) || !account(item.account) || !date(item.date) || item.date < opening.date) fail();
+        if (!['income', 'expense', 'transfer'].includes(String(item.kind)) || !positive(item.cents) || !account(item.account) || !date(item.date)) fail();
       } else if (name === 'reserves') {
         if (!positive(item.cents) || !account(item.account) || typeof item.delivered !== 'boolean') fail();
         if (item.deliveredCents !== undefined && (!nonnegative(item.deliveredCents) || item.deliveredCents > item.cents || item.delivered !== (item.deliveredCents === item.cents))) fail();

@@ -5,7 +5,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInitialState } from '../src/domain/setup.ts';
-import { demoState, available, financeReducer } from '../src/domain/finance.ts';
+import { demoState, available, financeReducer, actionWarning } from '../src/domain/finance.ts';
 import { createRepository, migrateDatabase } from '../src/storage/repository.ts';
 import type { SqlConnection } from '../src/storage/repository.ts';
 import { loadDatabaseKey, assertCipherAvailable } from '../src/storage/key.ts';
@@ -34,10 +34,36 @@ test('configuración inicial parte de saldos actuales, sin duplicar salario o cr
   assert.throws(() => createInitialState({ ...input, cashCents: -1 }, today));
   assert.throws(() => createInitialState({ ...input, settings: { ...input.settings, offeringPercent: 0.001 } }, today));
 });
-test('no permite registrar movimientos previos a los saldos iniciales', () => {
+test('permite gastos anteriores a la apertura con advertencia y los conserva al reabrir', async () => {
   const state = createInitialState(input, today);
-  assert.throws(() => financeReducer(state, { type: 'entry', entry: { id: 'old', kind: 'expense', concept: 'Pasado', cents: 100, account: 'cash', date: '2026-11-16' } }));
-  assert.equal(state.entries.length, 0);
+  const action = { type: 'entry' as const, entry: { id: 'gasolina', kind: 'expense' as const, concept: 'Gasolina coche', cents: 49000, account: 'cash' as const, date: '2026-11-16' } };
+  assert.match(actionWarning(state, action)!, /anterior a tus saldos iniciales/);
+  const db = new DatabaseSync(':memory:');
+  try {
+    await migrateDatabase(driver(db));
+    const repo = createRepository(driver(db));
+    await repo.initialize(state);
+    const saved = await repo.apply(action);
+    assert.equal(saved.balances.cash, state.balances.cash - 49000);
+    assert.equal(saved.entries[0].date, '2026-11-16');
+    assert.deepEqual(decodeState(encodeState(saved)), saved);
+    assert.deepEqual(await createRepository(driver(db)).load(), saved);
+    const edited = await repo.apply({ type: 'edit-entry', entry: { ...action.entry, cents: 50000, date: '2026-11-15' }, operationId: 'corregir-gasolina', today });
+    assert.equal(edited.balances.cash, state.balances.cash - 50000);
+    const opening = await repo.apply({ type: 'opening', opening: { ...state.opening, cashCents: 300000 }, today });
+    assert.equal(opening.balances.cash, 250000);
+    const removed = await repo.apply({ type: 'delete-entry', id: action.entry.id, operationId: 'borrar-gasolina', today });
+    assert.equal(removed.balances.cash, 300000);
+  } finally { db.close(); }
+});
+test('las advertencias de fecha histórica y saldo insuficiente se muestran juntas sin bloquear', () => {
+  const state = createInitialState(input, today);
+  const action = { type: 'entry' as const, entry: { id: 'pasado', kind: 'expense' as const, concept: 'Compra anterior', cents: 300000, account: 'cash' as const, date: '2026-11-16' } };
+  const warning = actionWarning(state, action)!;
+  assert.match(warning, /anterior a tus saldos iniciales/);
+  assert.match(warning, /dinero sin cubrir/);
+  assert.equal(financeReducer(state, action).balances.cash, -48000);
+  assert.throws(() => financeReducer(state, { ...action, entry: { ...action.entry, date: '2026-02-30' } }));
 });
 test('SQLCipher ausente nunca se interpreta como cifrado habilitado', () => {
   assert.throws(() => assertCipherAvailable(null), hasCode('encryption-unavailable'));

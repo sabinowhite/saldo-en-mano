@@ -125,11 +125,11 @@ export function recomputeBalances(state: FinanceState, entries = state.entries) 
   requireTrue(Number.isSafeInteger(balances.bank) && Number.isSafeInteger(balances.cash), 'El saldo excede el límite permitido.');
   return balances;
 }
-function checkEntry(state: FinanceState, e: Entry) {
-  requireTrue(validText(e.id) && validText(e.concept) && validAmount(e.cents) && validAccount(e.account) && validDate(e.date) && e.date >= state.opening.date && ['income', 'expense', 'transfer'].includes(e.kind), 'Revisa el concepto, monto, origen y fecha del movimiento.');
+function checkEntry(e: Entry) {
+  requireTrue(validText(e.id) && validText(e.concept) && validAmount(e.cents) && validAccount(e.account) && validDate(e.date) && ['income', 'expense', 'transfer'].includes(e.kind), 'Revisa el concepto, monto, origen y fecha del movimiento.');
 }
 function addEntry(state: FinanceState, entry: Entry): FinanceState {
-  checkEntry(state, entry);
+  checkEntry(entry);
   const entries = [entry, ...state.entries];
   return { ...state, entries, balances: recomputeBalances(state, entries) };
 }
@@ -166,7 +166,7 @@ export function financeReducer(state: FinanceState, action: Action): FinanceStat
     const o = action.opening;
     requireTrue(validDate(o.date) && validDate(action.today) && o.date <= action.today, 'La fecha de apertura debe ser válida y no estar en el futuro.');
     requireTrue(validAmount(o.bankCents, true) && validAmount(o.cashCents, true), 'Revisa los saldos de banco y efectivo; pueden ser cero.');
-    const dates = [...state.entries.map(e => e.date), ...state.payments.map(p => p.date), ...(state.reserves ?? []).flatMap(r => r.date ? [r.date] : []), ...(state.debtEvents ?? []).map(e => e.date), ...(state.templates ?? []).map(t => t.nextDate), ...(state.expectedIncomes ?? []).map(e => e.date), ...(state.settings.nextIncomeDate ? [state.settings.nextIncomeDate] : [])];
+    const dates = [...state.payments.map(p => p.date), ...(state.reserves ?? []).flatMap(r => r.date ? [r.date] : []), ...(state.debtEvents ?? []).map(e => e.date), ...(state.templates ?? []).map(t => t.nextDate), ...(state.expectedIncomes ?? []).map(e => e.date), ...(state.settings.nextIncomeDate ? [state.settings.nextIncomeDate] : [])];
     requireTrue(dates.every(date => date >= o.date), 'La apertura no puede ser posterior a un movimiento o compromiso existente.');
     const next = { ...state, opening: { ...o } };
     return { ...next, balances: recomputeBalances(next) };
@@ -221,7 +221,7 @@ export function financeReducer(state: FinanceState, action: Action): FinanceStat
     const old = state.entries.find(e => e.id === id);
     requireTrue(old, 'No se encontró el movimiento.');
     const nextEntry = action.type === 'edit-entry' ? { ...action.entry, link: old.link } : null;
-    if (nextEntry) checkEntry(state, nextEntry);
+    if (nextEntry) checkEntry(nextEntry);
     const updated = patchLinked(state, old, nextEntry);
     const entries = nextEntry ? updated.entries.map(e => e.id === id ? nextEntry : e) : updated.entries.filter(e => e.id !== id);
     return { ...updated, entries, balances: recomputeBalances(updated, entries), edits: [...(state.edits ?? []), { id: action.operationId, date: action.today, entryId: id, before: old, after: nextEntry }] };
@@ -229,7 +229,7 @@ export function financeReducer(state: FinanceState, action: Action): FinanceStat
   const id = action.type === 'entry' ? action.entry.id : action.entryId;
   if (state.entries.some(e => e.id === id) || (state.edits ?? []).some(e => e.entryId === id && e.after === null)) return state;
   if (action.type === 'entry') return addEntry(state, { ...action.entry, link: undefined });
-  requireTrue(validDate(action.date) && action.date >= state.opening.date, 'La fecha debe ser válida y posterior a los saldos iniciales.');
+  requireTrue(validDate(action.date), 'La fecha del movimiento debe ser válida.');
   if (action.type === 'receive-expected') {
     const expected = (state.expectedIncomes ?? []).find(e => e.id === action.id);
     requireTrue(expected, 'No se encontró el ingreso esperado.');
@@ -298,5 +298,9 @@ export function reconcileSchedules(state: FinanceState, today: string, forceTemp
 export function actionWarning(state: FinanceState, action: Action): string | null {
   const next = financeReducer(state, action);
   const impacted = (['bank', 'cash'] as const).filter(a => available(next, a) < 0 && available(next, a) < available(state, a));
-  return impacted.length ? 'Este cambio deja dinero sin cubrir en ' + impacted.map(a => (a === 'bank' ? 'banco' : 'efectivo') + ' (' + money(-available(next, a)) + ')').join(' y ') + '. Puedes continuar, pero afectará tus compromisos o superará tu saldo.' : null;
+  const warnings: string[] = [];
+  const date = action.type === 'entry' || action.type === 'edit-entry' ? action.entry.date : ['payment', 'deliver', 'debt', 'receive-expected'].includes(action.type) && 'date' in action ? action.date : undefined;
+  if (date && date < state.opening.date) warnings.push('La fecha es anterior a tus saldos iniciales. Este movimiento también actualizará tu saldo actual. Si ya estaba incluido en esos saldos, corrige los importes de apertura en Ajustes para evitar contarlo dos veces.');
+  if (impacted.length) warnings.push('Este cambio deja dinero sin cubrir en ' + impacted.map(a => (a === 'bank' ? 'banco' : 'efectivo') + ' (' + money(-available(next, a)) + ')').join(' y ') + '. Puedes continuar, pero afectará tus compromisos o superará tu saldo.');
+  return warnings.length ? warnings.join('\n\n') : null;
 }

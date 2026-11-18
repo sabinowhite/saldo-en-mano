@@ -21,7 +21,7 @@ export function MovementSheet({ sheet, state, onClose, onSubmit, onReset, newId,
   function prepare() {
     setError('');
     if (sheet.kind === 'reset') return;
-    if (date < state.opening.date || !validDate(date)) return setError('La fecha debe ser válida y no ser anterior a tus saldos iniciales.');
+    if (!validDate(date)) return setError('Escribe una fecha válida con formato AAAA-MM-DD.');
     const cents = parseMoney(amount);
     if (!cents) return setError('Escribe un monto mayor que cero, con hasta dos decimales y sin separadores de miles.');
     const id = newId(); let action: Action;
