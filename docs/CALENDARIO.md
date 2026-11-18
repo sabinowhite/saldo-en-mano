@@ -6,4 +6,4 @@ Android abre el calendario del sistema con Elegir y Cancelar; cancelar conserva 
 
 La fecha se construye y convierte en hora local para evitar desplazar un día en México. Se mantienen las validaciones de fechas, la advertencia no bloqueante para movimientos históricos y la identidad contable. Solo la apertura limita la selección a fechas no futuras.
 
-Validación: lint, TypeScript, 53 pruebas, configuración SQLCipher y compilación Android (pendiente de terminar). Las pruebas de interacción en un teléfono deben realizarse tras instalar.
+Validación: lint, TypeScript, 53 pruebas, configuración SQLCipher y compilación Android completada; firma permanente, versión e integridad de Room verificadas. Las pruebas de interacción en un teléfono deben realizarse tras instalar.
