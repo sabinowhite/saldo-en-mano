@@ -35,7 +35,10 @@
       "shortName": "Saldo en Mano"
     },
     "extra": {
-      "developmentPreview": true
+      "developmentPreview": true,
+      "eas": {
+        "projectId": "1fcd41f3-475d-4695-aab2-5835ceea0d4a"
+      }
     },
     "plugins": [
       "expo-router",
@@ -71,6 +74,7 @@
     "experiments": {
       "typedRoutes": true
     },
-    "icon": "./assets/saldo-icon.png"
+    "icon": "./assets/saldo-icon.png",
+    "owner": "sabinowhite"
   }
 }
