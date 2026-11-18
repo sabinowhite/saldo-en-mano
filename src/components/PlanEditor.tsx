@@ -2,13 +2,13 @@ import { DateField } from './DateField';
 import { useState } from 'react';
 import { Switch, Text, TextInput, View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
-import { actionWarning, contributions, deliveredReserve, localDate, money, parseMoney, period } from '../domain/finance';
+import { actionWarning, contributions, deliveredReserve, localDate, money, parseMoney, period, remainingReserve } from '../domain/finance';
 import type { Account, Action, FinanceState } from '../domain/finance';
 import { nextScheduled, repeatLabels } from '../domain/schedule';
 import type { Repeat } from '../domain/schedule';
 import { Button, Card, Chip, Notice, colors, ui } from './ui';
 import { SheetFrame } from './SheetFrame';
-export type PlanSheet = { kind: 'plan'; entity: 'reserve' | 'payment' | 'template' | 'debt' | 'contributions'; id?: string };
+export type PlanSheet = { kind: 'plan'; entity: 'reserve' | 'payment' | 'template' | 'debt' | 'contributions'; id?: string; remove?: boolean };
 const amountOrZero = (s: string) => /^0(?:[.,]0{1,2})?$/.test(s.trim()) ? 0 : parseMoney(s);
 function Field({ label, value, onChange, amount = false }: { label: string; value: string; onChange: (s: string) => void; amount?: boolean }) {
   return <><Text style={ui.h3}>{label}</Text><TextInput accessibilityLabel={label} style={ui.input} value={value} onChangeText={onChange} keyboardType={amount ? 'decimal-pad' : 'default'} maxLength={amount ? 12 : 100} /></>;
@@ -31,7 +31,7 @@ export function PlanEditor({ sheet, state, onSubmit, onClose }: { sheet: PlanShe
   const [enabled, setEnabled] = useState(existing && 'enabled' in existing ? existing.enabled : true);
   const [reminder, setReminder] = useState(existing && 'reminder' in existing ? existing.reminder : true);
   const [offering, setOffering] = useState(String(state.settings.offeringPercent));
-  const [review, setReview] = useState<{ action: Action; warning: string | null; summary: string } | null>(null);
+  const [review, setReview] = useState<{ action: Action; warning: string | null; summary: string } | null>(() => sheet.remove && sheet.entity === 'reserve' && existing && 'delivered' in existing ? { action: { type: 'delete-reserve', id: existing.id }, warning: null, summary: `Eliminar «${existing.concept}» de tus apartados. Se liberarán ${money(remainingReserve(existing))} del dinero reservado. Las entregas realizadas y sus gastos se conservarán en el historial. Tu saldo total no aumentará.` } : null);
   const [error, setError] = useState(''); const [busy, setBusy] = useState(false);
   const names = { reserve: 'Apartado', payment: 'Pago pendiente', template: 'Pago programado', debt: 'Deuda', contributions: 'Diezmo y ofrenda' };
   function stage(action: Action, summary: string) {
@@ -64,8 +64,8 @@ export function PlanEditor({ sheet, state, onSubmit, onClose }: { sheet: PlanShe
     try { await onSubmit(review.action); } catch (e) { setError(e instanceof Error ? e.message : 'No se pudo guardar. Intenta nuevamente.'); } finally { setBusy(false); }
   }
   const spent = existing && 'delivered' in existing ? deliveredReserve(existing) : 0;
-  return <SheetFrame title={`${existing ? 'Editar' : 'Nuevo'} ${names[sheet.entity].toLowerCase()}`} busy={busy} onClose={onClose}>
-    {review ? <><Card><Text style={ui.body}>{review.summary}</Text></Card>{review.warning && <Notice>{review.warning}</Notice>}<Button label={busy ? 'Guardando…' : review.warning ? 'Guardar de todos modos' : 'Confirmar y guardar'} disabled={busy} onPress={save} /><Button label="Volver y corregir" secondary disabled={busy} onPress={() => setReview(null)} /></> : <>
+  return <SheetFrame title={sheet.remove ? 'Eliminar apartado' : `${existing ? 'Editar' : 'Nuevo'} ${names[sheet.entity].toLowerCase()}`} busy={busy} onClose={onClose}>
+    {review ? <><Card><Text style={ui.body}>{review.summary}</Text></Card>{review.warning && <Notice>{review.warning}</Notice>}<Button label={busy ? 'Guardando…' : review.action.type === 'delete-reserve' ? 'Eliminar apartado' : review.warning ? 'Guardar de todos modos' : 'Confirmar y guardar'} disabled={busy} onPress={save} /><Button label={sheet.remove ? "Conservar apartado" : "Volver y corregir"} secondary disabled={busy} onPress={() => { if (sheet.remove) onClose(); else setReview(null); }} /></> : <>
       {sheet.entity !== 'contributions' && <Field label="Concepto" value={concept} onChange={setConcept} />}
       {sheet.entity === 'debt' && <Field label="A quién le debes" value={creditor} onChange={setCreditor} />}
       <Field label={sheet.entity === 'contributions' ? 'Ingreso base en pesos' : sheet.entity === 'debt' ? 'Saldo actual de la deuda' : sheet.entity === 'reserve' ? 'Monto total del apartado' : 'Monto previsto en pesos'} value={amount} onChange={setAmount} amount />
@@ -77,7 +77,7 @@ export function PlanEditor({ sheet, state, onSubmit, onClose }: { sheet: PlanShe
       {sheet.entity === 'template' && <><Text style={ui.h3}>Frecuencia</Text><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>{(Object.keys(repeatLabels) as Repeat[]).map(key => <Chip key={key} label={repeatLabels[key]} selected={frequency === key} onPress={() => setFrequency(key)} />)}</View><Toggle label="Monto variable (puedes dejar 0)" value={variable} onChange={setVariable} /><Toggle label="Programación activa" value={enabled} onChange={setEnabled} /><Toggle label="Recordatorio de pago" value={reminder} onChange={setReminder} /></>}
       {sheet.entity === 'debt' && <><Field label="Incremento mensual (0 si no aplica)" value={monthly} onChange={setMonthly} amount /><Text style={ui.h3}>Próximo cargo mensual</Text><DateField label="Próximo cargo mensual" value={nextCharge} onChange={setNextCharge} />{existing && <Notice>Si cambias el saldo, quedará un ajuste en el estado de cuenta. Para registrar un pago utiliza «Abonar».</Notice>}</>}
       <Button label="Revisar datos" onPress={prepare} />
-      {existing && sheet.entity === 'reserve' && <Button label="Cancelar saldo pendiente del apartado" secondary onPress={() => stage({ type: 'cancel-reserve', id }, 'Se liberará lo pendiente del apartado. Las entregas anteriores permanecerán en el historial.')} />}
+      {existing && sheet.entity === 'reserve' && <Button label="Eliminar apartado" secondary onPress={() => stage({ type: 'delete-reserve', id }, 'Se eliminará de tus apartados y se liberará el saldo pendiente de entregar. Las entregas y sus gastos permanecerán en el historial; tu saldo total no aumentará.')} />}
       {existing && sheet.entity === 'payment' && <Button label="Cancelar este pago pendiente" secondary onPress={() => stage({ type: 'cancel-payment', id }, 'Se cancelará este pendiente y se liberará su reserva. No se eliminará la programación de pagos futuros.')} />}
     </>}
     {!!error && <Text accessibilityLiveRegion="polite" style={{ color: colors.red }}>{error}</Text>}

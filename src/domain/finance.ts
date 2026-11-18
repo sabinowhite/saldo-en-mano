@@ -31,6 +31,7 @@ export type Action =
   | { type: 'receive-expected'; id: string; entryId: string; cents: number; account: Account; date: string }
   | { type: 'save-reserves'; reserves: Reserve[] }
   | { type: 'cancel-reserve'; id: string }
+  | { type: 'delete-reserve'; id: string }
   | { type: 'save-payment'; payment: Payment }
   | { type: 'cancel-payment'; id: string }
   | { type: 'save-template'; template: PaymentTemplate; today: string }
@@ -191,7 +192,7 @@ export function financeReducer(state: FinanceState, action: Action): FinanceStat
     }
     return { ...state, reserves };
   }
-  if (action.type === 'cancel-reserve') return { ...state, reserves: state.reserves.map(r => r.id === action.id ? { ...r, cancelled: true } : r) };
+  if (action.type === 'cancel-reserve' || action.type === 'delete-reserve') return { ...state, reserves: state.reserves.map(r => r.id === action.id ? { ...r, cancelled: true } : r) };
   if (action.type === 'save-payment') {
     const p = action.payment; const old = state.payments.find(p => p.id === action.payment.id);
     requireTrue(!old?.paid, 'Corrige un pago realizado desde sus movimientos.');

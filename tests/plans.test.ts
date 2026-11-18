@@ -89,3 +89,34 @@ test('ingresos esperados permiten abonos parciales sin sumar el salario antes de
   assert.equal(s.balances.bank, 1400000); assert.equal(s.expectedIncomes!.find(e => e.id === id)!.receivedCents, 400000);
   assert.deepEqual(financeReducer(s, { type: 'tick', today: date }).expectedIncomes, s.expectedIncomes);
 });
+
+test('eliminar apartado libera solo su pendiente y conserva saldo e historial de entregas', () => {
+  let s = financeReducer(start(), { type: 'save-reserves', reserves: [{ id: 'eliminar', concept: 'Colegiatura', cents: 100000, account: 'cash', delivered: false, date }] });
+  s = financeReducer(s, { type: 'deliver', id: 'eliminar', entryId: 'entrega', cents: 30000, account: 'cash', date });
+  const before = available(s);
+  const next = financeReducer(s, { type: 'delete-reserve', id: 'eliminar' });
+  assert.equal(available(next), before + 70000);
+  assert.deepEqual(next.balances, s.balances);
+  assert.deepEqual(next.entries, s.entries);
+  assert.equal(next.reserves[0].deliveredCents, 30000);
+  assert.equal(next.reserves[0].cancelled, true);
+  assert.deepEqual(decodeState(encodeState(next)), next);
+  assert.deepEqual(financeReducer(next, { type: 'delete-reserve', id: 'eliminar' }), next);
+  assert.deepEqual(financeReducer(next, { type: 'deliver', id: 'eliminar', entryId: 'no-entregar', cents: 100, account: 'cash', date }), next);
+  const corrected = financeReducer(next, { type: 'edit-entry', entry: { ...next.entries[0], cents: 20000 }, operationId: 'corregir-entrega', today: date });
+  assert.equal(corrected.reserves[0].deliveredCents, 20000);
+  assert.equal(corrected.reserves[0].cancelled, true);
+  assert.equal(remainingReserve(corrected.reserves[0]), 0);
+  assert.deepEqual(decodeState(encodeState(corrected)), corrected);
+});
+test('eliminar apartados sin entregas y totalmente entregados no crea movimientos ficticios', () => {
+  for (const delivered of [false, true]) {
+    let s = financeReducer(start(), { type: 'save-reserves', reserves: [{ id: 'r', concept: 'Internet', cents: 10000, account: 'bank', delivered: false, date }] });
+    if (delivered) s = financeReducer(s, { type: 'deliver', id: 'r', entryId: 'gasto', date });
+    const next = financeReducer(s, { type: 'delete-reserve', id: 'r' });
+    assert.deepEqual(next.entries, s.entries);
+    assert.deepEqual(next.balances, s.balances);
+    assert.equal(available(next) - available(s), delivered ? 0 : 10000);
+    assert.deepEqual(decodeState(encodeState(next)), next);
+  }
+});

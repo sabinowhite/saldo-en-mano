@@ -4,18 +4,21 @@ import { FinanceState, deliveredReserve, money, remainingReserve } from '../doma
 import { repeatLabels } from '../domain/schedule';
 import { Card, Chip, Button, Heading, Notice, ui, colors } from '../components/ui';
 import type { PlanSheet } from '../components/PlanEditor';
-type Props = { state: FinanceState; onDeliver: (id: string) => void; onPay: (id: string) => void; onDebt: (id: string) => void; onEdit: (entity: PlanSheet['entity'], id?: string) => void; onEntry: (id: string) => void };
-export function Plans({ state, onDeliver, onPay, onDebt, onEdit, onEntry }: Props) {
+type Props = { state: FinanceState; onDeliver: (id: string) => void; onPay: (id: string) => void; onDebt: (id: string) => void; onEdit: (entity: PlanSheet['entity'], id?: string) => void; onDeleteReserve: (id: string) => void; onEntry: (id: string) => void };
+export function Plans({ state, onDeliver, onPay, onDebt, onEdit, onEntry, onDeleteReserve }: Props) {
   const [section, setSection] = useState('Apartados');
   const [history, setHistory] = useState(false);
+  const [reserveHistory, setReserveHistory] = useState(false);
   const [statement, setStatement] = useState<string | null>(null);
   return <View style={{ gap: 20 }}><Heading title="Tu plan financiero" subtitle="Anticípate a lo que viene." /><View style={ui.row}>{['Apartados', 'Pagos', 'Deudas'].map(s => <Chip key={s} label={s} selected={s === section} onPress={() => setSection(s)} />)}</View>
     {section === 'Apartados' && <>
       <Card><Text style={ui.h2}>Dinero con un propósito</Text><Text style={[ui.amount, { fontSize: 30 }]}>{money(state.reserves.reduce((s, r) => s + remainingReserve(r), 0))}</Text><Text style={ui.small}>Pendiente de entregar</Text><Text style={ui.small}>Entregado: {money(state.reserves.reduce((s, r) => s + deliveredReserve(r), 0))}</Text></Card>
       <Button label="Calcular diezmo y ofrenda" icon="heart-outline" onPress={() => onEdit('contributions')} />
       <Button label="Agregar otro apartado" secondary icon="add" onPress={() => onEdit('reserve')} />
-      {!state.reserves.length && <Notice>Agrega los conceptos que quieras apartar. Reservar dinero no es un gasto; entregarlo sí registra la salida.</Notice>}
-      {state.reserves.map(r => <Card key={r.id}><View style={ui.spread}><View style={ui.flex}><Text style={ui.h3}>{r.concept}</Text><Text style={ui.small}>{r.cancelled ? 'Cancelado' : r.delivered ? 'Entregado' : `Apartado en ${r.account === 'bank' ? 'banco' : 'efectivo'}`}</Text></View><Text style={ui.amount}>{money(remainingReserve(r))}</Text></View><Text style={ui.small}>Total: {money(r.cents)} · Entregado: {money(deliveredReserve(r))}</Text><Button label="Registrar entrega" secondary disabled={r.delivered || r.cancelled} onPress={() => onDeliver(r.id)} />{!r.cancelled && <Button label="Editar apartado" secondary onPress={() => onEdit('reserve', r.id)} />}</Card>)}
+      <View style={ui.row}><Chip label="Apartados" selected={!reserveHistory} onPress={() => setReserveHistory(false)} /><Chip label="Eliminados" selected={reserveHistory} onPress={() => setReserveHistory(true)} /></View>
+      {reserveHistory && !state.reserves.some(r => r.cancelled) && <Notice>No hay apartados eliminados.</Notice>}
+      {!reserveHistory && !state.reserves.some(r => !r.cancelled) && <Notice>Agrega los conceptos que quieras apartar. Reservar dinero no es un gasto; entregarlo sí registra la salida.</Notice>}
+      {state.reserves.filter(r => reserveHistory ? r.cancelled : !r.cancelled).map(r => <Card key={r.id}><View style={ui.spread}><View style={ui.flex}><Text style={ui.h3}>{r.concept}</Text><Text style={ui.small}>{r.cancelled ? 'Eliminado' : r.delivered ? 'Entregado' : `Apartado en ${r.account === 'bank' ? 'banco' : 'efectivo'}`}</Text></View><Text style={ui.amount}>{money(remainingReserve(r))}</Text></View><Text style={ui.small}>Total: {money(r.cents)} · Entregado: {money(deliveredReserve(r))}</Text>{!r.cancelled && <><Button label="Registrar entrega" secondary disabled={r.delivered} onPress={() => onDeliver(r.id)} /><Button label="Editar apartado" secondary onPress={() => onEdit('reserve', r.id)} /><Button label="Eliminar apartado" secondary icon="trash-outline" onPress={() => onDeleteReserve(r.id)} /></>}</Card>)}
     </>}
     {section === 'Pagos' && <>
       <Button label="Programar un pago" icon="calendar-outline" onPress={() => onEdit('template')} />
