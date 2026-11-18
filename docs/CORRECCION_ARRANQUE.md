@@ -15,3 +15,11 @@ python scripts/verify-room-apk.py ruta/al/apk
 ```
 
 El comando falla sobre el APK 0.3.0 que presenta el defecto. Debe aprobar en el APK corregido antes de entregarlo. Inspecciona los DEX reales, no la fuente ni una compilación debug. La confirmación funcional del arranque en el teléfono sigue siendo una comprobación distinta.
+
+## Resultado del APK 0.3.1
+
+Compilación release finalizada correctamente. La comprobación DEX aprueba en el APK 0.3.1 firmado y falla en el 0.3.0 original: el constructor público sin parámetros ahora está presente con código. apksigner verifica la firma y confirma el mismo certificado de la primera versión. Paquete com.sabinowhite.saldoenmano, versionCode 4. Lint, TypeScript y 44 pruebas correctos. Falta confirmar el arranque en el teléfono del usuario; este entorno no ejecuta el APK en Android.
+
+SHA-256 del APK: 223f42addc0dc3e198f62701359135dd8ae784e39e6b07919071f7ca1c144e84
+
+Instalar como actualización; no desinstalar ni borrar datos. El respaldo privado original de firma sigue siendo el válido. Google Drive permanece pendiente de OAuth.
