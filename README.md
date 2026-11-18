@@ -8,7 +8,7 @@ Aplicación de control de finanzas personales para Android y iPhone. Ayudará a 
 
 Candidata de desarrollo 0.3.0 con Expo SDK 58, Expo Router y TypeScript. Incluye movimientos editables, ingresos esperados, apartados parciales, pagos recurrentes, deudas, reportes, almacenamiento cifrado, bloqueo, recordatorios y respaldo recuperable con conexión opcional a Google Drive.
 
-El código está preparado para la primera prueba completa. Aún no hay APK firmado: el Project ID de Expo ya está configurado; falta verificar el acceso desde Actions, preparar la firma permanente y configurar los clientes OAuth de Google. Los módulos nativos deben validarse juntos en teléfonos con datos ficticios. Expo Go y la web ofrecen únicamente demostración en memoria.
+Ya se generó el primer APK Android release 0.3.0 para arm64-v8a, firmado y verificado. Ver [APK Android](docs/APK_ANDROID.md) para identidad, firma y límites. Falta validar los flujos en un teléfono. Google Drive permanece deshabilitado hasta configurar OAuth. Expo Go y la web ofrecen únicamente demostración en memoria.
 
 Consulta [Primera versión completa y configuración pendiente](docs/PRIMERA_VERSION.md), [Desarrollo](docs/DESARROLLO.md) y [Persistencia local](docs/ALMACENAMIENTO.md).
 
@@ -124,7 +124,7 @@ Las advertencias deben tener texto además de color. Priorizar accesibilidad, ta
 - Guardar dinero como unidades menores enteras y definir un redondeo consistente de porcentajes; evitar cálculos monetarios con coma flotante.
 - Usar operaciones atómicas y referencias únicas para que un pago, entrega o abono no se contabilice dos veces.
 
-Estas decisiones orientan la implementación. Las bibliotecas concretas y sus versiones aún no están seleccionadas.
+Las dependencias concretas están registradas en package.json y package-lock.json.
 
 ## Seguridad y respaldo
 
@@ -159,7 +159,7 @@ Requisito obligatorio desde el primer APK distribuido:
 
 Antes de entregar cada actualización, instalarla sobre la versión anterior y verificar conservación de saldos, movimientos, apartados, deudas y configuración. Un APK de depuración no sustituye la estrategia de firma de distribución.
 
-La identidad definitiva de la app, la custodia de claves y la primera compilación firmada siguen pendientes. No se han creado credenciales de publicación en este cambio.
+La identidad y la primera firma privada ya están preparadas. Ver docs/APK_ANDROID.md; conservar la clave entregada para todas las actualizaciones.
 
 ## Validación prevista
 
@@ -174,12 +174,11 @@ La identidad definitiva de la app, la custodia de claves y la primera compilaci�
 
 ## Próximos pasos
 
-1. Validar pantallas, persistencia y cifrado en compilaciones nativas de prueba.
-2. Completar captura y edición de apartados, plantillas, pagos y deudas.
-3. Integrar bloqueo, recordatorios y respaldo recuperable.
-4. Resolver o evaluar los avisos de dependencias antes de distribuir.
-5. Configurar firma permanente y validar la primera distribución Android.
-6. Probar y preparar la distribución iOS.
+1. Instalar el APK y validar los flujos, persistencia y cifrado en el teléfono.
+2. Configurar OAuth de Google para habilitar Drive.
+3. Resolver o evaluar los avisos de dependencias antes de publicar.
+4. Validar una actualización conservando los datos y la misma firma.
+5. Probar y preparar la distribución iOS.
 
 ## Datos y secretos fuera de Git
 

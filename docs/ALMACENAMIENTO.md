@@ -62,7 +62,7 @@ Pendientes de ejecutar sobre una compilación nativa con datos ficticios:
 - Actualizar sobre una instalación anterior usando el mismo identificador y certificado; verificar conservación de base y clave.
 - Revisar bloqueo del dispositivo, navegación, textos grandes y pantallas con teclado en Android e iOS.
 
-Hay recuperación externa cifrada y bloqueo opcional implementados; todavía no hay un APK de distribución firmado. Ver PRIMERA_VERSION.md para configuración de Drive y límites. Estas comprobaciones no se marcan como aprobadas por haber exportado los bundles JavaScript.
+Hay recuperación externa cifrada y bloqueo opcional implementados; ya hay un APK release firmado para iniciar la prueba nativa. Ver PRIMERA_VERSION.md para configuración de Drive y límites. Estas comprobaciones no se marcan como aprobadas por haber exportado los bundles JavaScript.
 
 ## Referencias
 
