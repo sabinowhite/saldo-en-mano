@@ -106,3 +106,26 @@ test('movimientos inválidos no alteran el estado', () => {
   assert.throws(() => financeReducer(state, { type: 'entry', entry: { ...entry, concept: ' ' } }));
   assert.equal(state.balances.cash, 252000);
 });
+test('corregir apertura conserva retiros, gastos e ingresos y recalcula ambas cuentas', () => {
+  let state = demoState(today);
+  state = { ...state, entries: [
+    { id: 'r', kind: 'transfer', account: 'bank', cents: 100000, date: today, concept: 'Retiro' },
+    { id: 'g', kind: 'expense', account: 'cash', cents: 40000, date: today, concept: 'Comida' },
+    { id: 'i', kind: 'income', account: 'bank', cents: 20000, date: today, concept: 'Ingreso' },
+  ] };
+  const opening = { date: '2026-11-16', bankCents: 500000, cashCents: 0 };
+  const next = financeReducer(state, { type: 'opening', opening, today });
+  assert.deepEqual(next.balances, { bank: 420000, cash: 60000 });
+  assert.deepEqual(next.entries, state.entries);
+  assert.deepEqual(next.reserves, state.reserves);
+  assert.throws(() => financeReducer(state, { type: 'opening', opening: { ...opening, date: '2026-11-18' }, today: '2026-11-18' }));
+  assert.throws(() => financeReducer(state, { type: 'opening', opening: { ...opening, cashCents: -1 }, today }));
+});
+test('editar ingreso previsto conserva abonos y saldos, impide reducirlo bajo lo recibido', () => {
+  const state = { ...demoState(today), expectedIncomes: [{ id: 'income:original', date: today, cents: 1400000, receivedCents: 500000 }] };
+  const next = financeReducer(state, { type: 'edit-expected', id: 'income:original', date: '2026-11-20', cents: 1200000 });
+  assert.deepEqual(next.balances, state.balances);
+  assert.equal(next.expectedIncomes![0].receivedCents, 500000);
+  assert.equal(next.expectedIncomes![0].id, 'income:original');
+  assert.throws(() => financeReducer(state, { type: 'edit-expected', id: 'income:original', date: today, cents: 400000 }));
+});

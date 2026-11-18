@@ -27,12 +27,12 @@ function Shell() {
 }
 export default function Layout() { return <SafeAreaProvider><FinanceProvider><Shell /></FinanceProvider></SafeAreaProvider>; }
 const s = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Platform.OS === 'web' ? '#E8EFEB' : colors.bg },
+  safe: { flex: 1, backgroundColor: Platform.OS === 'web' ? '#F3DCC5' : colors.bg },
   shell: { flex: 1, width: '100%', maxWidth: 520, alignSelf: 'center', backgroundColor: colors.bg },
-  header: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 22, paddingVertical: 16, backgroundColor: 'white' },
+  header: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingHorizontal: 22, paddingVertical: 16, backgroundColor: colors.paper },
   brandMark: { backgroundColor: colors.primary, borderRadius: 13, height: 40, width: 40, alignItems: 'center', justifyContent: 'center' }, brand: { fontSize: 18, fontWeight: '700', color: colors.ink, letterSpacing: -.4 }, tagline: { fontSize: 11, color: colors.muted, marginTop: 2 },
   demoTag: { backgroundColor: colors.pale, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 }, demoText: { fontSize: 10, fontWeight: '700', letterSpacing: 1, color: colors.primary },
   banner: { flexDirection: 'row', gap: 7, alignItems: 'center', backgroundColor: colors.warningBg, paddingHorizontal: 20, paddingVertical: 10 }, bannerText: { flex: 1, fontSize: 11, lineHeight: 16, color: colors.warning },
   content: { padding: 22, paddingBottom: 30, gap: 20 },
-  nav: { flexDirection: 'row', backgroundColor: 'white', borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8, paddingBottom: 8, paddingHorizontal: 8 }, navItem: { flex: 1, alignItems: 'center', gap: 3, minHeight: 60, justifyContent: 'center' }, navIcon: { paddingVertical: 5, paddingHorizontal: 17, borderRadius: 12 }, navLabel: { fontSize: 10, color: colors.muted },
+  nav: { flexDirection: 'row', backgroundColor: colors.paper, borderTopWidth: 1, borderTopColor: colors.border, paddingTop: 8, paddingBottom: 8, paddingHorizontal: 8 }, navItem: { flex: 1, alignItems: 'center', gap: 3, minHeight: 60, justifyContent: 'center' }, navIcon: { paddingVertical: 5, paddingHorizontal: 17, borderRadius: 12 }, navLabel: { fontSize: 10, color: colors.muted },
 });

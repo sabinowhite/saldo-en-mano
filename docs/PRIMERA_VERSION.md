@@ -2,9 +2,9 @@
 
 ## Estado
 
-La candidata de desarrollo 0.3.0 reúne los flujos financieros y los adaptadores nativos. Ya se generó el APK Android release; ver APK_ANDROID.md. No se afirma que los módulos hayan sido probados en teléfonos. Las comprobaciones de JavaScript y del dominio no sustituyen las pruebas nativas.
+La candidata de desarrollo 0.3.0 reúne los flujos financieros y los adaptadores nativos. No se ha generado aún un APK ni se afirma que los módulos hayan sido probados en teléfonos. Las comprobaciones de JavaScript y del dominio no sustituyen las pruebas nativas.
 
-Se conserva el identificador com.sabinowhite.saldoenmano. La firma exclusiva de actualizaciones ya fue creada y respaldada privadamente, fuera de EAS: el token se ha guardado en GitHub según confirmación del propietario y el código apunta al proyecto EAS 1fcd41f3-475d-4695-aab2-5835ceea0d4a; falta verificar su acceso desde Actions. Los clientes OAuth de Google tampoco están presentes. Estas configuraciones son necesarias para la primera prueba completa con APK y Drive.
+Se conserva el identificador com.sabinowhite.saldoenmano. La firma permanente no se ha creado en este entorno: el token se ha guardado en GitHub según confirmación del propietario y el código apunta al proyecto EAS 1fcd41f3-475d-4695-aab2-5835ceea0d4a; falta verificar su acceso desde Actions. Los clientes OAuth de Google tampoco están presentes. Estas configuraciones son necesarias para la primera prueba completa con APK y Drive.
 
 ## Funciones incluidas en el código
 
@@ -41,11 +41,11 @@ npx eas-cli@latest init
 npx eas-cli@latest credentials --platform android
 ```
 
-El project ID proporcionado por el propietario está guardado en app.json. EAS_PROJECT_ID permite sobrescribirlo en el entorno de compilación. Si se retoma EAS, importar la keystore exclusiva del primer APK, su alias y contraseña desde el respaldo privado entregado al propietario; no crear otra firma. No subir esos archivos ni contraseñas a Git.
+El project ID proporcionado por el propietario está guardado en app.json. EAS_PROJECT_ID permite sobrescribirlo en el entorno de compilación. Preparar credenciales Android permanentes para esta aplicación y respaldar la keystore, alias y contraseñas en un gestor seguro bajo control del propietario. No subir esos archivos ni contraseñas a Git.
 
 Los perfiles de eas.json usan credentialsSource=remote y códigos crecientes. No generar una keystore nueva en cada compilación. La clave de firma de APK es distinta de la clave de la base local y de la clave de recuperación de respaldos.
 
-La distribución inicial ya se compiló localmente como APK release, sin developmentClient. El perfil preview queda preparado como alternativa futura. Para futuras actualizaciones, utilizar el mismo proyecto, paquete, perfil de credenciales y certificado. Si se incorpora Play App Signing, verificar aparte la compatibilidad del canal de distribución; no asumir que el APK externo y el de Play tendrán la misma firma.
+La distribución inicial será preview con APK release, no developmentClient ni APK de depuración. Para futuras actualizaciones, utilizar el mismo proyecto, paquete, perfil de credenciales y certificado. Si se incorpora Play App Signing, verificar aparte la compatibilidad del canal de distribución; no asumir que el APK externo y el de Play tendrán la misma firma.
 
 ### 2. Preparar Google Cloud
 

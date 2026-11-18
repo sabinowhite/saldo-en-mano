@@ -26,6 +26,8 @@ export type Action =
   | { type: 'deliver'; id: string; entryId: string; date: string; cents?: number; account?: Account }
   | { type: 'debt'; id: string; entryId: string; cents: number; account: Account; date: string }
   | { type: 'settings'; settings: Settings }
+  | { type: 'edit-expected'; id: string; cents: number; date: string }
+  | { type: 'opening'; opening: FinanceState['opening']; today: string }
   | { type: 'receive-expected'; id: string; entryId: string; cents: number; account: Account; date: string }
   | { type: 'save-reserves'; reserves: Reserve[] }
   | { type: 'cancel-reserve'; id: string }
@@ -155,6 +157,20 @@ function patchLinked(state: FinanceState, old: Entry, replacement: Entry | null)
   return { ...state, payments: state.payments.map(p => p.id === link.id ? { ...p, paid: !!replacement, cents: replacement?.cents ?? p.cents, account: replacement?.account ?? p.account } : p) };
 }
 export function financeReducer(state: FinanceState, action: Action): FinanceState {
+  if (action.type === 'edit-expected') {
+    const old = (state.expectedIncomes ?? []).find(e => e.id === action.id);
+    requireTrue(old && validAmount(action.cents) && action.cents >= old.receivedCents && validDate(action.date) && action.date >= state.opening.date, 'Revisa la fecha y el monto esperado; no puede ser menor que lo ya recibido.');
+    return { ...state, expectedIncomes: state.expectedIncomes!.map(e => e.id === action.id ? { ...e, date: action.date, cents: action.cents } : e) };
+  }
+  if (action.type === 'opening') {
+    const o = action.opening;
+    requireTrue(validDate(o.date) && validDate(action.today) && o.date <= action.today, 'La fecha de apertura debe ser válida y no estar en el futuro.');
+    requireTrue(validAmount(o.bankCents, true) && validAmount(o.cashCents, true), 'Revisa los saldos de banco y efectivo; pueden ser cero.');
+    const dates = [...state.entries.map(e => e.date), ...state.payments.map(p => p.date), ...(state.reserves ?? []).flatMap(r => r.date ? [r.date] : []), ...(state.debtEvents ?? []).map(e => e.date), ...(state.templates ?? []).map(t => t.nextDate), ...(state.expectedIncomes ?? []).map(e => e.date), ...(state.settings.nextIncomeDate ? [state.settings.nextIncomeDate] : [])];
+    requireTrue(dates.every(date => date >= o.date), 'La apertura no puede ser posterior a un movimiento o compromiso existente.');
+    const next = { ...state, opening: { ...o } };
+    return { ...next, balances: recomputeBalances(next) };
+  }
   if (action.type === 'tick') return reconcileSchedules(state, action.today);
   if (action.type === 'settings') {
     const s = action.settings;

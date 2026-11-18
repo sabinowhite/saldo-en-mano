@@ -2,13 +2,13 @@
   "expo": {
     "name": "Saldo en Mano",
     "slug": "saldo-en-mano",
-    "version": "0.3.2",
+    "version": "0.3.4",
     "orientation": "default",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sabinowhite.saldoenmano",
-      "buildNumber": "5",
+      "buildNumber": "7",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.sabinowhite.saldoenmano",
-      "versionCode": 5,
+      "versionCode": 7,
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -26,8 +26,8 @@
         "android.permission.SYSTEM_ALERT_WINDOW"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/saldo-icon.png",
-        "backgroundColor": "#174E40"
+        "foregroundImage": "./assets/saldo-icon-orange.png",
+        "backgroundColor": "#D86624"
       }
     },
     "web": {
@@ -65,7 +65,7 @@
       [
         "expo-notifications",
         {
-          "color": "#176B57"
+          "color": "#B94E20"
         }
       ],
       "expo-background-task",
@@ -82,7 +82,9 @@
     "experiments": {
       "typedRoutes": true
     },
-    "icon": "./assets/saldo-icon.png",
-    "owner": "sabinowhite"
+    "icon": "./assets/saldo-icon-orange.png",
+    "owner": "sabinowhite",
+    "backgroundColor": "#FFF3E6",
+    "primaryColor": "#B94E20"
   }
 }

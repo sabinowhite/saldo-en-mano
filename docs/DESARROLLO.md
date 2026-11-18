@@ -52,7 +52,7 @@ Validación local de esta versión: lint y TypeScript correctos, 44 pruebas apro
 - Esquema: saldoenmano.
 - Versión: 0.3.0; versionCode y buildNumber: 3.
 
-Ya existe una firma privada exclusiva y el primer APK release; ver APK_ANDROID.md. La clave permanente está respaldada privadamente fuera de Git. Todos los APK siguientes deben usar la misma identidad y firma, con código de versión creciente. La clave de publicación es distinta de la clave de cifrado generada en cada teléfono.
+No hay clave de publicación ni APK de distribución. Antes del primer APK para el usuario debe prepararse y respaldarse una clave permanente fuera de Git. Todos los APK siguientes deben usar la misma identidad y firma, con código de versión creciente. La clave de publicación es distinta de la clave de cifrado generada en cada teléfono.
 
 ## Auditoría de dependencias pendiente
 

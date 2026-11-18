@@ -4,7 +4,24 @@ import { FinanceState, Settings as SettingsType, contributions, money, parseMone
 import { nextScheduled } from '../domain/schedule';
 import { SecurityControls } from '../components/SecurityControls';
 import { Button, Card, Chip, Heading, Icon, Notice, colors, ui } from '../components/ui';
-export function Settings({ state, mode, onSave, onReset, onDemo, onLeaveDemo, onRestore }: { state: FinanceState; mode: 'demo' | 'local'; onSave: (s: SettingsType) => Promise<void>; onReset: () => void; onDemo: () => void; onLeaveDemo: () => void; onRestore: (state: FinanceState) => Promise<void> }) {
+export function Settings({ state, mode, onSave, onOpeningSave, onExpectedSave, onReset, onDemo, onLeaveDemo, onRestore }: { state: FinanceState; mode: 'demo' | 'local'; onSave: (s: SettingsType) => Promise<void>; onOpeningSave: (opening: FinanceState['opening']) => Promise<void>; onExpectedSave: (id: string, cents: number, date: string) => Promise<void>; onReset: () => void; onDemo: () => void; onLeaveDemo: () => void; onRestore: (state: FinanceState) => Promise<void> }) {
+  const [openingDate, setOpeningDate] = useState(state.opening.date);
+  const [bank, setBank] = useState(String(state.opening.bankCents / 100));
+  const [cash, setCash] = useState(String(state.opening.cashCents / 100));
+  const [openingSaving, setOpeningSaving] = useState(false);
+  const [openingMessage, setOpeningMessage] = useState('');
+  async function saveOpening() {
+    if (openingSaving) return;
+    const amount = (value: string) => /^0(?:[.,]0{1,2})?$/.test(value.trim()) ? 0 : parseMoney(value);
+    const bankCents = amount(bank), cashCents = amount(cash);
+    if (bankCents === null || cashCents === null) { setOpeningMessage('Escribe saldos válidos, mayores o iguales a cero.'); return; }
+    setOpeningSaving(true); setOpeningMessage('');
+    try {
+      await onOpeningSave({ date: openingDate, bankCents, cashCents });
+      setOpeningMessage('Saldos de apertura guardados. Los saldos actuales se recalcularon conservando tus movimientos.');
+    } catch (e) { setOpeningMessage(e instanceof Error ? e.message : 'No se pudieron guardar los saldos.'); }
+    finally { setOpeningSaving(false); }
+  }
   const [salary, setSalary] = useState(String(state.settings.salaryCents / 100));
   const [offering, setOffering] = useState(String(state.settings.offeringPercent));
   const [frequency, setFrequency] = useState(state.settings.frequency);
@@ -32,10 +49,36 @@ export function Settings({ state, mode, onSave, onReset, onDemo, onLeaveDemo, on
     <Button label={saving ? 'Guardando…' : mode === 'demo' ? 'Aplicar a la demostración' : 'Guardar configuración'} onPress={save} disabled={!valid || saving} />
     {!!saveError && <Text accessibilityLiveRegion="polite" style={{ color: colors.red }}>{saveError}</Text>}
     {!!feedback && <Text accessibilityLiveRegion="polite" style={[ui.small, { color: colors.primary }]}>{feedback}</Text>}
+    <Heading title="Ingresos esperados" subtitle="Corrige cada previsión. Los ingresos recibidos se corrigen desde Movimientos." />
+    {(state.expectedIncomes ?? []).filter(e => e.receivedCents < e.cents).map(e => <ExpectedIncomeEditor key={e.id} income={e} onSave={onExpectedSave} />)}
     {mode === 'local' && <SecurityControls state={state} onRestore={onRestore} />}
-    <Card><Heading title="Saldos de apertura" subtitle={state.opening.date.split('-').reverse().join('/')} /><Text style={ui.small}>Banco: {money(state.opening.bankCents)} · Efectivo: {money(state.opening.cashCents)}. Los movimientos se registran a partir de esa fecha.</Text></Card>
+    <Card><Heading title="Saldos de apertura" subtitle="Tu dinero antes del primer movimiento que registrarás." />
+      <Text style={ui.small}>Si capturarás gastos desde el día 16, indica lo que tenías al comenzar ese día, antes de retiros, ingresos y gastos. Corregir la apertura no cuenta como ingreso ni borra movimientos.</Text>
+      <Text style={ui.h3}>Fecha de apertura (AAAA-MM-DD)</Text><TextInput accessibilityLabel="Fecha de apertura" style={ui.input} value={openingDate} onChangeText={setOpeningDate} maxLength={10} />
+      <Text style={ui.h3}>Saldo inicial en banco</Text><TextInput accessibilityLabel="Saldo de apertura en banco" style={ui.input} keyboardType="decimal-pad" value={bank} onChangeText={setBank} maxLength={12} />
+      <Text style={ui.h3}>Saldo inicial en efectivo</Text><TextInput accessibilityLabel="Saldo de apertura en efectivo" style={ui.input} keyboardType="decimal-pad" value={cash} onChangeText={setCash} maxLength={12} />
+      <Button label={openingSaving ? 'Guardando saldos…' : 'Guardar saldos de apertura'} onPress={saveOpening} disabled={openingSaving} />
+      {!!openingMessage && <Text accessibilityLiveRegion="polite" style={ui.small}>{openingMessage}</Text>}
+    </Card>
     <Notice>Versión de prueba: utiliza datos ficticios hasta completar las pruebas en dispositivos y la recuperación de respaldos.</Notice>
     {mode === 'demo' ? <><Button label="Reiniciar datos de ejemplo" onPress={onReset} secondary icon="refresh-outline" /><Button label="Salir de la demostración" onPress={onLeaveDemo} secondary /></> : <Button label="Explorar demostración sin modificar mis datos" onPress={onDemo} secondary />}
-    <Text style={[ui.small, { textAlign: 'center', paddingVertical: 12 }]}>Saldo en Mano · 0.3.0 · Pruebas de desarrollo</Text>
+    <Text style={[ui.small, { textAlign: 'center', paddingVertical: 12 }]}>Saldo en Mano · 0.3.3 · Pruebas de desarrollo</Text>
   </View>;
+}
+
+function ExpectedIncomeEditor({ income, onSave }: { income: NonNullable<FinanceState['expectedIncomes']>[number]; onSave: (id: string, cents: number, date: string) => Promise<void> }) {
+  const [amount, setAmount] = useState(String(income.cents / 100));
+  const [date, setDate] = useState(income.date);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  async function save() {
+    const cents = parseMoney(amount);
+    if (busy) return;
+    if (cents === null) { setMessage('Escribe un monto mayor que cero.'); return; }
+    setBusy(true); setMessage('');
+    try { await onSave(income.id, cents, date); setMessage('Ingreso esperado actualizado. El dinero recibido se conserva.'); }
+    catch (e) { setMessage(e instanceof Error ? e.message : 'No se pudo guardar.'); }
+    finally { setBusy(false); }
+  }
+  return <Card><Text style={ui.h3}>Ingreso previsto</Text><Text style={ui.small}>Recibido: {money(income.receivedCents)}. El monto previsto incluye lo ya recibido. Esta edición no modifica la frecuencia de los siguientes ingresos.</Text><Text style={ui.h3}>Monto total esperado</Text><TextInput accessibilityLabel="Monto total del ingreso esperado" style={ui.input} value={amount} onChangeText={setAmount} keyboardType="decimal-pad" maxLength={12} /><Text style={ui.h3}>Fecha esperada (AAAA-MM-DD)</Text><TextInput accessibilityLabel="Fecha del ingreso esperado" style={ui.input} value={date} onChangeText={setDate} maxLength={10} /><Button label={busy ? 'Guardando…' : 'Guardar ingreso esperado'} onPress={save} disabled={busy} />{!!message && <Text accessibilityLiveRegion="polite" style={ui.small}>{message}</Text>}</Card>;
 }

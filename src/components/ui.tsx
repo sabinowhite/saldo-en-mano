@@ -2,7 +2,7 @@ import { PropsWithChildren, ComponentProps } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-export const colors = { ink: '#172A2A', muted: '#647773', primary: '#176B57', pale: '#E8F2EE', paper: '#FFFFFF', bg: '#F4F7F5', border: '#E1E9E5', warning: '#8A5C12', warningBg: '#FFF3DB', red: '#B64236' };
+export const colors = { ink: '#30231D', muted: '#7B675B', primary: '#B94E20', pale: '#FFE3C7', paper: '#FFFCF8', bg: '#FFF3E6', border: '#EFD4BC', warning: '#8A5C12', warningBg: '#FFF3DB', red: '#B64236' };
 export type IconName = ComponentProps<typeof Ionicons>['name'];
 export function Icon({ name, color = colors.primary, size = 22 }: { name: IconName; color?: string; size?: number }) {
   return <Ionicons name={name} color={color} size={size} accessible={false} />;
