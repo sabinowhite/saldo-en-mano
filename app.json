@@ -1,0 +1,90 @@
+{
+  "expo": {
+    "name": "Saldo en Mano",
+    "slug": "saldo-en-mano",
+    "version": "0.3.6",
+    "orientation": "default",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sabinowhite.saldoenmano",
+      "buildNumber": "9",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "package": "com.sabinowhite.saldoenmano",
+      "versionCode": 9,
+      "allowBackup": false,
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/saldo-icon-orange.png",
+        "backgroundColor": "#D86624"
+      }
+    },
+    "web": {
+      "name": "Saldo en Mano",
+      "shortName": "Saldo en Mano"
+    },
+    "extra": {
+      "developmentPreview": true,
+      "eas": {
+        "projectId": "1fcd41f3-475d-4695-aab2-5835ceea0d4a"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-sqlite",
+        {
+          "useSQLCipher": true
+        }
+      ],
+      [
+        "expo-secure-store",
+        {
+          "configureAndroidBackup": true
+        }
+      ],
+      "expo-sharing",
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Usa Face ID para proteger el acceso a tus finanzas."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#B94E20"
+        }
+      ],
+      "expo-background-task",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "# Room databases are created reflectively by WorkManager during Android startup.\n-keep class * extends androidx.room.RoomDatabase {\n    <init>();\n}\n"
+          }
+        }
+      ]
+    ],
+    "scheme": "saldoenmano",
+    "experiments": {
+      "typedRoutes": true
+    },
+    "icon": "./assets/saldo-icon-orange.png",
+    "owner": "sabinowhite",
+    "backgroundColor": "#FFF3E6",
+    "primaryColor": "#B94E20"
+  }
+}

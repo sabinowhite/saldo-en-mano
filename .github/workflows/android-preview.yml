@@ -1,0 +1,33 @@
+name: Build signed Android preview
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CI: '1'
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_PROJECT_ID: ${{ vars.EAS_PROJECT_ID }}
+      EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID: ${{ vars.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID }}
+      EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID: ${{ vars.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npm run check:build-ready
+      - name: Check Expo authentication
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then
+            echo "Configure EXPO_TOKEN in repository secrets. Never commit it."
+            exit 1
+          fi
+          npx eas-cli@latest whoami
+      - name: Build APK with previously configured permanent signing credentials
+        run: npx eas-cli@latest build --platform android --profile preview --non-interactive --wait

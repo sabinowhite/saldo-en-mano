@@ -1,0 +1,48 @@
+# Dependencies, generated output and development state
+node_modules/
+.expo/
+dist/
+web-build/
+coverage/
+*.log
+*.tsbuildinfo
+expo-env.d.ts
+/android/
+/ios/
+
+# Environment and service credentials
+.env
+.env.*
+!.env.example
+credentials.json
+google-services.json
+GoogleService-Info.plist
+client_secret*.json
+service-account*.json
+
+# Signing material
+*.jks
+*.keystore
+*.p12
+*.p8
+*.mobileprovision
+*.pem
+
+# Private data and backups
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+backups/
+private-data/
+
+# Distribution artifacts
+*.apk
+*.aab
+*.ipa
+
+# OS files
+.DS_Store
+Thumbs.db
