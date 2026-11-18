@@ -1,3 +1,4 @@
+import { DateField } from './DateField';
 import { useState } from 'react';
 import { Switch, Text, TextInput, View } from 'react-native';
 import { randomUUID } from 'expo-crypto';
@@ -71,10 +72,10 @@ export function PlanEditor({ sheet, state, onSubmit, onClose }: { sheet: PlanShe
       {spent > 0 && <Notice>Ya entregaste {money(spent)}. El total del apartado no puede ser menor que esa cantidad.</Notice>}
       {sheet.entity === 'contributions' && <><Field label="Porcentaje de ofrenda sobre el ingreso" value={offering} onChange={setOffering} amount /><Text style={ui.small}>El diezmo es 10 %. La ofrenda se calcula sobre el ingreso, no sobre el diezmo.</Text></>}
       {sheet.entity !== 'debt' && <><Text style={ui.h3}>Origen del dinero</Text><View style={ui.row}><Chip label="Banco" selected={account === 'bank'} onPress={() => setAccount('bank')} /><Chip label="Efectivo" selected={account === 'cash'} onPress={() => setAccount('cash')} /></View></>}
-      <Field label={sheet.entity === 'template' ? 'Próxima fecha (AAAA-MM-DD)' : 'Fecha (AAAA-MM-DD)'} value={date} onChange={setDate} />
+      <Text style={ui.h3}>{sheet.entity === 'template' ? 'Próxima fecha' : 'Fecha'}</Text><DateField label={sheet.entity === 'template' ? 'Próxima fecha' : 'Fecha'} value={date} onChange={setDate} />
       {(sheet.entity === 'payment' || sheet.entity === 'template') && <Toggle label="Apartar del saldo disponible" value={reserve} onChange={setReserve} />}
       {sheet.entity === 'template' && <><Text style={ui.h3}>Frecuencia</Text><View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>{(Object.keys(repeatLabels) as Repeat[]).map(key => <Chip key={key} label={repeatLabels[key]} selected={frequency === key} onPress={() => setFrequency(key)} />)}</View><Toggle label="Monto variable (puedes dejar 0)" value={variable} onChange={setVariable} /><Toggle label="Programación activa" value={enabled} onChange={setEnabled} /><Toggle label="Recordatorio de pago" value={reminder} onChange={setReminder} /></>}
-      {sheet.entity === 'debt' && <><Field label="Incremento mensual (0 si no aplica)" value={monthly} onChange={setMonthly} amount /><Field label="Próximo cargo mensual (AAAA-MM-DD)" value={nextCharge} onChange={setNextCharge} />{existing && <Notice>Si cambias el saldo, quedará un ajuste en el estado de cuenta. Para registrar un pago utiliza «Abonar».</Notice>}</>}
+      {sheet.entity === 'debt' && <><Field label="Incremento mensual (0 si no aplica)" value={monthly} onChange={setMonthly} amount /><Text style={ui.h3}>Próximo cargo mensual</Text><DateField label="Próximo cargo mensual" value={nextCharge} onChange={setNextCharge} />{existing && <Notice>Si cambias el saldo, quedará un ajuste en el estado de cuenta. Para registrar un pago utiliza «Abonar».</Notice>}</>}
       <Button label="Revisar datos" onPress={prepare} />
       {existing && sheet.entity === 'reserve' && <Button label="Cancelar saldo pendiente del apartado" secondary onPress={() => stage({ type: 'cancel-reserve', id }, 'Se liberará lo pendiente del apartado. Las entregas anteriores permanecerán en el historial.')} />}
       {existing && sheet.entity === 'payment' && <Button label="Cancelar este pago pendiente" secondary onPress={() => stage({ type: 'cancel-payment', id }, 'Se cancelará este pendiente y se liberará su reserva. No se eliminará la programación de pagos futuros.')} />}

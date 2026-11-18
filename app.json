@@ -2,13 +2,13 @@
   "expo": {
     "name": "Saldo en Mano",
     "slug": "saldo-en-mano",
-    "version": "0.3.4",
+    "version": "0.3.5",
     "orientation": "default",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sabinowhite.saldoenmano",
-      "buildNumber": "7",
+      "buildNumber": "8",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.sabinowhite.saldoenmano",
-      "versionCode": 7,
+      "versionCode": 8,
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",

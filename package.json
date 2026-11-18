@@ -1,9 +1,10 @@
 {
   "name": "saldo-en-mano",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-community/datetimepicker": "9.2.1",
     "expo": "~58.0.26",
     "expo-background-task": "~58.0.13",
     "expo-build-properties": "~58.0.12",

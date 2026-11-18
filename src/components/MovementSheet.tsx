@@ -1,3 +1,4 @@
+import { DateField } from './DateField';
 import { useState } from 'react';
 import { Text, TextInput, View } from 'react-native';
 import { Account, Action, Entry, FinanceState, actionWarning, localDate, money, parseMoney, period, remainingReserve, validDate } from '../domain/finance';
@@ -21,7 +22,7 @@ export function MovementSheet({ sheet, state, onClose, onSubmit, onReset, newId,
   function prepare() {
     setError('');
     if (sheet.kind === 'reset') return;
-    if (!validDate(date)) return setError('Escribe una fecha válida con formato AAAA-MM-DD.');
+    if (!validDate(date)) return setError('Elige una fecha válida en el calendario.');
     const cents = parseMoney(amount);
     if (!cents) return setError('Escribe un monto mayor que cero, con hasta dos decimales y sin separadores de miles.');
     const id = newId(); let action: Action;
@@ -58,7 +59,7 @@ export function MovementSheet({ sheet, state, onClose, onSubmit, onReset, newId,
       <Text style={ui.h3}>Monto en pesos</Text><TextInput autoFocus accessibilityLabel="Monto del movimiento" style={[ui.input, { fontSize: 26 }]} placeholder="0.00" placeholderTextColor={colors.muted} keyboardType="decimal-pad" value={amount} onChangeText={setAmount} maxLength={12} />
       {!fixed && !debt && !expected && <><Text style={ui.h3}>Concepto</Text><TextInput accessibilityLabel="Concepto del movimiento" style={ui.input} value={concept} onChangeText={setConcept} maxLength={100} /></>}
       <Text style={ui.h3}>{sheet.kind === 'income' ? 'Recibir en' : 'Sale de'}</Text><View style={ui.row}><Chip label="Banco" selected={account === 'bank'} onPress={() => setAccount('bank')} /><Chip label="Efectivo" selected={account === 'cash'} onPress={() => setAccount('cash')} /></View>
-      <Text style={ui.h3}>Fecha (AAAA-MM-DD)</Text><TextInput accessibilityLabel="Fecha del movimiento" style={ui.input} value={date} onChangeText={setDate} maxLength={10} />
+      <Text style={ui.h3}>Fecha</Text><DateField label="Fecha del movimiento" value={date} onChange={setDate} />
       {sheet.kind === 'deliver' && <Text style={ui.small}>Puedes entregar todo o una parte del importe pendiente.</Text>}
       {sheet.kind === 'payment' && <Text style={ui.small}>Confirma el monto real y de dónde salió. Puede ser diferente del monto previsto.</Text>}
       <Button label="Revisar movimiento" onPress={prepare} />
