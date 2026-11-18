@@ -2,13 +2,13 @@
   "expo": {
     "name": "Saldo en Mano",
     "slug": "saldo-en-mano",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "orientation": "default",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sabinowhite.saldoenmano",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "com.sabinowhite.saldoenmano",
-      "versionCode": 3,
+      "versionCode": 4,
       "allowBackup": false,
       "blockedPermissions": [
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -68,7 +68,15 @@
           "color": "#176B57"
         }
       ],
-      "expo-background-task"
+      "expo-background-task",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "extraProguardRules": "# Room databases are created reflectively by WorkManager during Android startup.\n-keep class * extends androidx.room.RoomDatabase {\n    <init>();\n}\n"
+          }
+        }
+      ]
     ],
     "scheme": "saldoenmano",
     "experiments": {
