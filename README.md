@@ -6,7 +6,7 @@ Aplicación de control de finanzas personales para Android y iPhone. Ayudará a 
 
 ## Estado del proyecto
 
-Candidata de desarrollo 0.3.1 con Expo SDK 58, Expo Router y TypeScript. Incluye movimientos editables, ingresos esperados, apartados parciales, pagos recurrentes, deudas, reportes, almacenamiento cifrado, bloqueo, recordatorios y respaldo recuperable con conexión opcional a Google Drive.
+Candidata de desarrollo 0.3.2 con Expo SDK 58, Expo Router y TypeScript. Incluye movimientos editables, ingresos esperados, apartados parciales, pagos recurrentes, deudas, reportes, almacenamiento cifrado, bloqueo, recordatorios y respaldo recuperable con conexión opcional a Google Drive.
 
 El código está preparado para la primera prueba completa. Aún no hay APK firmado: el Project ID de Expo ya está configurado; falta verificar el acceso desde Actions, preparar la firma permanente y configurar los clientes OAuth de Google. Los módulos nativos deben validarse juntos en teléfonos con datos ficticios. Expo Go y la web ofrecen únicamente demostración en memoria.
 

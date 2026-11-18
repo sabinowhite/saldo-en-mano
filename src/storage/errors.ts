@@ -11,7 +11,10 @@ const messages: Record<StorageErrorCode, string> = {
 };
 export class StorageError extends Error {
   readonly code: StorageErrorCode;
-  constructor(code: StorageErrorCode) { super(messages[code]); this.name = 'StorageError'; this.code = code; }
+  constructor(code: StorageErrorCode, stage?: 'almacen-seguro' | 'prueba-cifrado' | 'ruta-base' | 'clave-base' | 'abrir-base') {
+    super(messages[code] + (stage ? ` Referencia: ${stage}.` : ''));
+    this.name = 'StorageError'; this.code = code;
+  }
 }
 export function storageMessage(error: unknown): string {
   return error instanceof StorageError ? error.message : messages.unavailable;
